@@ -7,11 +7,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: '/og-image.png',
-        destination: '/opengraph-image',
-        permanent: true,
-      },
+      { source: '/icon', destination: '/icon.png', permanent: true },
+      { source: '/opengraph-image', destination: '/opengraph-image.png', permanent: true },
+      { source: '/og-image.png', destination: '/og-cover.png', permanent: true },
     ]
   },
   async headers() {
@@ -27,6 +25,13 @@ const nextConfig: NextConfig = {
         source: '/metadata/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=3600' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
+        source: '/:file(icon.png|og-cover.png|opengraph-image.png|app-icon.png)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
         ],
       },
