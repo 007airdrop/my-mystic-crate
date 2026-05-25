@@ -28,7 +28,11 @@ import { APP_URL } from '@/lib/constants';
 import { openSeaAssetUrl } from '@/lib/nft-variants';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 import type { MintResult } from '@/lib/parse-mint';
-import { fetchMintFromTxHash } from '@/lib/fetch-mint';
+
+function nftImageSrc(path: string): string {
+  if (path.startsWith('http')) return path;
+  return `${APP_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
 
 const rarities = [
   { name: 'COMMON', prob: 50, color: '#22C55E' },
@@ -124,27 +128,17 @@ export default function Home() {
     void (async () => {
       setWaitingForPayment(false);
 
-      for (let attempt = 0; attempt < 8; attempt++) {
+      for (let attempt = 0; attempt < 12; attempt++) {
         if (cancelled) return;
-        await new Promise((r) => setTimeout(r, attempt === 0 ? 600 : 1500));
+        await new Promise((r) => setTimeout(r, attempt < 2 ? 800 : 2000));
 
         try {
           const res = await fetch(`/api/mint?hash=${encodeURIComponent(hash)}`, {
             cache: 'no-store',
           });
-          const data = (await res.json()) as { ok: boolean; mint?: MintResult };
+          const data = (await res.json()) as { ok: boolean; mint?: MintResult; error?: string };
           if (data.ok && data.mint) {
             applyMintReveal(data.mint);
-            return;
-          }
-        } catch {
-          /* retry */
-        }
-
-        try {
-          const mint = await fetchMintFromTxHash(hash);
-          if (mint) {
-            applyMintReveal(mint);
             return;
           }
         } catch {
@@ -342,18 +336,12 @@ export default function Home() {
                   <div className="relative w-full max-w-[280px] mx-auto aspect-square">
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/60 to-pink-500/60 blur-2xl rounded-3xl" />
                     <Image
-                      src={revealedNFT.startsWith('/') ? revealedNFT : `${APP_URL}${revealedNFT}`}
+                      src={nftImageSrc(revealedNFT)}
                       alt="Your NFT"
                       fill
                       className="object-contain rounded-2xl border-4 border-purple-400/70 shadow-2xl relative z-10"
                       unoptimized
                       priority
-                      onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        if (!img.src.includes(APP_URL) && revealedNFT.startsWith('/')) {
-                          img.src = `${APP_URL}${revealedNFT}`;
-                        }
-                      }}
                     />
                   </div>
                   <div className="mt-5 flex flex-col items-center gap-2">

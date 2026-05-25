@@ -5,6 +5,12 @@ import { useAccount } from 'wagmi';
 import { useInventory } from '@/hooks/useInventory';
 import { NFT_CONTRACT_ADDRESS } from '@/lib/contracts';
 import { openSeaAssetUrl } from '@/lib/nft-variants';
+import { APP_URL } from '@/lib/constants';
+
+function nftImageSrc(path: string): string {
+  if (path.startsWith('http')) return path;
+  return `${APP_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
 
 const OPENSEA_COLLECTION = `https://opensea.io/assets/base/${NFT_CONTRACT_ADDRESS}`;
 
@@ -55,7 +61,7 @@ export function InventoryPanel() {
           >
             <div className="relative aspect-square w-full mb-1">
               <Image
-                src={item.imagePath.startsWith('http') ? item.imagePath : item.imagePath}
+                src={nftImageSrc(item.imagePath)}
                 alt={item.name}
                 fill
                 className="object-contain rounded-lg"

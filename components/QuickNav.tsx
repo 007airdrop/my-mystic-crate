@@ -43,7 +43,7 @@ export function QuickNav({ active, onChange }: QuickNavProps) {
                 {item.icon}
               </span>
               <span
-                className={`text-[11px] mt-1 font-bold leading-tight tracking-tight ${
+                className={`text-xs mt-1 font-bold leading-tight tracking-tight ${
                   isActive ? 'text-white' : 'text-zinc-300'
                 }`}
               >

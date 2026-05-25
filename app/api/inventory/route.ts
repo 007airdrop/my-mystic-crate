@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { decodeEventLog, parseAbiItem, isAddress } from 'viem';
 import { NFT_CONTRACT_ADDRESS } from '@/lib/contracts';
 import { getVariantById } from '@/lib/nft-variants';
-import { publicClient, getRecentFromBlock } from '@/lib/chain-client';
+import { publicClient, getLogsChunked, NFT_DEPLOY_BLOCK } from '@/lib/chain-client';
 
 const ZERO = '0x0000000000000000000000000000000000000000' as const;
 
@@ -31,15 +31,14 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const fromBlock = await getRecentFromBlock();
     const contract = NFT_CONTRACT_ADDRESS as `0x${string}`;
     const user = address as `0x${string}`;
 
-    const transferLogs = await publicClient.getLogs({
+    const transferLogs = await getLogsChunked({
       address: contract,
       event: transferEvent,
       args: { to: user, from: ZERO },
-      fromBlock,
+      fromBlock: NFT_DEPLOY_BLOCK,
       toBlock: 'latest',
     });
 
