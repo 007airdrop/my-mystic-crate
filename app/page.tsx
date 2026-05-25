@@ -27,7 +27,8 @@ import {
 import { APP_URL } from '@/lib/constants';
 import { openSeaAssetUrl } from '@/lib/nft-variants';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
-import { parseMintFromReceipt } from '@/lib/parse-mint';
+import type { MintResult } from '@/lib/parse-mint';
+import { fetchMintFromTxHash } from '@/lib/fetch-mint';
 
 const rarities = [
   { name: 'COMMON', prob: 50, color: '#22C55E' },
@@ -45,8 +46,9 @@ export default function Home() {
   const { isConnected } = useAccount();
   const { switchChain } = useSwitchChain();
   const { writeContract, data: hash, isPending: isSending, error: writeError } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } =
-    useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
   const { totalXp, mintsRemaining, refetch: refetchStats } = usePlayerStats();
 
   const [screen, setScreen] = useState<AppScreen>('crate');
@@ -91,40 +93,75 @@ export default function Home() {
     }
   };
 
-  const revealFromReceipt = useCallback(() => {
-    if (!receipt) return false;
-    const mint = parseMintFromReceipt(receipt);
-    if (!mint) return false;
-
-    setRarity(mint.rarity);
-    setRevealedNFT(mint.imagePath);
-    setTokenId(mint.tokenId);
-    setLastXpGain(mint.xpAwarded);
-    setIsOpening(false);
-    void refetchStats();
-    void queryClient.invalidateQueries({ queryKey: ['inventory'] });
-    new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
-    return true;
-  }, [receipt, refetchStats, queryClient]);
+  const applyMintReveal = useCallback(
+    (mint: MintResult) => {
+      setRarity(mint.rarity);
+      setRevealedNFT(mint.imagePath);
+      setTokenId(mint.tokenId);
+      setLastXpGain(mint.xpAwarded > 0 ? mint.xpAwarded : null);
+      setIsOpening(false);
+      setScreen('crate');
+      void refetchStats();
+      void queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
+    },
+    [refetchStats, queryClient],
+  );
 
   const performOpenAnimation = useCallback(() => {
     setIsOpening(true);
+    setRevealedNFT(null);
+    setRarity('');
+    setTokenId(null);
     new Audio('/sounds/crate-open.mp3').play().catch((err) => console.warn('Sound error:', err));
   }, []);
 
   useEffect(() => {
-    if (!isConfirmed || !waitingForPayment) return;
-    setWaitingForPayment(false);
+    if (!hash || !isConfirmed || !waitingForPayment) return;
 
-    const timer = setTimeout(() => {
-      if (!revealFromReceipt()) {
-        setIsOpening(false);
-        alert('Mint confirmed! Open Items tab — if image missing, refresh in a few seconds.');
+    let cancelled = false;
+
+    void (async () => {
+      setWaitingForPayment(false);
+
+      for (let attempt = 0; attempt < 8; attempt++) {
+        if (cancelled) return;
+        await new Promise((r) => setTimeout(r, attempt === 0 ? 600 : 1500));
+
+        try {
+          const res = await fetch(`/api/mint?hash=${encodeURIComponent(hash)}`, {
+            cache: 'no-store',
+          });
+          const data = (await res.json()) as { ok: boolean; mint?: MintResult };
+          if (data.ok && data.mint) {
+            applyMintReveal(data.mint);
+            return;
+          }
+        } catch {
+          /* retry */
+        }
+
+        try {
+          const mint = await fetchMintFromTxHash(hash);
+          if (mint) {
+            applyMintReveal(mint);
+            return;
+          }
+        } catch {
+          /* retry */
+        }
       }
-    }, 800);
 
-    return () => clearTimeout(timer);
-  }, [isConfirmed, waitingForPayment, revealFromReceipt]);
+      if (!cancelled) {
+        setIsOpening(false);
+        setXpToast('Mint confirmed! Open Items → Refresh');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hash, isConfirmed, waitingForPayment, applyMintReveal]);
 
   useEffect(() => {
     if (writeError && waitingForPayment) {
@@ -224,9 +261,13 @@ export default function Home() {
           <div className="text-center py-1 text-green-400 text-xs font-medium shrink-0">{xpToast}</div>
         )}
 
-        {(waitingForPayment || isSending || isConfirming) && screen === 'crate' && (
-          <div className="text-center py-1 text-yellow-400 text-xs shrink-0">
-            {isSending ? 'Confirm mint...' : isConfirming ? 'Minting on Base...' : 'Waiting...'}
+        {(waitingForPayment || isSending || isConfirming || isOpening) && screen === 'crate' && !revealedNFT && (
+          <div className="text-center py-1 text-yellow-400 text-xs shrink-0 animate-pulse">
+            {isSending
+              ? 'Confirm in wallet...'
+              : isConfirming || isOpening
+              ? 'Opening crate on Base...'
+              : 'Waiting...'}
           </div>
         )}
 
@@ -256,11 +297,15 @@ export default function Home() {
                   onClick={handlePressS}
                   className="cursor-pointer"
                 >
-                  <motion.div
-                    animate={isOpening ? { scale: [1, 1.15, 0.9, 1.08, 1] } : {}}
-                    transition={{ duration: 1.4 }}
-                    className="relative w-48 h-48"
-                  >
+              <motion.div
+                animate={
+                  isOpening || isConfirming
+                    ? { scale: [1, 1.2, 0.85, 1.15, 0.95, 1.1, 1], rotate: [0, -8, 8, -5, 5, 0] }
+                    : {}
+                }
+                transition={{ duration: 2, repeat: isOpening || isConfirming ? Infinity : 0 }}
+                className="relative w-48 h-48"
+              >
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-violet-600 rounded-full blur-3xl opacity-70" />
                     <div className="relative w-48 h-48 rounded-full border-8 border-white/30 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-2xl">
                       <div className="text-center">
