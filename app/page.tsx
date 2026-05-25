@@ -12,12 +12,17 @@ import { base } from 'wagmi/chains';
 import { decodeEventLog, parseEther } from 'viem';
 import Image from 'next/image';
 import { ConnectWallet } from '@/components/ConnectWallet';
+import { PhoneOverlay } from '@/components/PhoneOverlay';
+import { DailyPanel } from '@/components/DailyPanel';
+import { LeaderboardPanel } from '@/components/LeaderboardPanel';
 import {
   mysticCrateAbi,
   OPEN_CRATE_PRICE,
   NFT_CONTRACT_ADDRESS,
+  MAX_MINTS_PER_DAY,
 } from '@/lib/contracts';
 import { getVariantById, openSeaAssetUrl } from '@/lib/nft-variants';
+import { usePlayerStats } from '@/hooks/usePlayerStats';
 
 const rarities = [
   { name: 'COMMON', prob: 50, color: '#22C55E' },
@@ -36,15 +41,26 @@ export default function Home() {
   const { writeContract, data: hash, isPending: isSending, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } =
     useWaitForTransactionReceipt({ hash });
+  const { totalXp, mintsRemaining, refetch: refetchStats } = usePlayerStats();
 
   const [isOpening, setIsOpening] = useState(false);
   const [revealedNFT, setRevealedNFT] = useState<string | null>(null);
   const [rarity, setRarity] = useState('');
   const [tokenId, setTokenId] = useState<string | null>(null);
+  const [lastXpGain, setLastXpGain] = useState<number | null>(null);
   const [waitingForPayment, setWaitingForPayment] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicStarted, setMusicStarted] = useState(false);
+  const [showDaily, setShowDaily] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [xpToast, setXpToast] = useState<string | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+
+  const showXpToast = useCallback((msg: string) => {
+    setXpToast(msg);
+    setTimeout(() => setXpToast(null), 3500);
+    void refetchStats();
+  }, [refetchStats]);
 
   const startMusic = useCallback(() => {
     if (!musicEnabled || musicStarted) return;
@@ -84,13 +100,16 @@ export default function Home() {
 
         const variantId = Number(decoded.args.variantId);
         const mintedTokenId = decoded.args.tokenId?.toString();
+        const xpAwarded = Number(decoded.args.xpAwarded ?? 0);
         const variant = getVariantById(variantId);
         if (!variant) return false;
 
         setRarity(variant.rarity.toUpperCase());
         setRevealedNFT(variant.imagePath);
         setTokenId(mintedTokenId ?? null);
+        setLastXpGain(xpAwarded);
         setIsOpening(false);
+        void refetchStats();
         new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
         return true;
       } catch {
@@ -98,7 +117,7 @@ export default function Home() {
       }
     }
     return false;
-  }, [receipt]);
+  }, [receipt, refetchStats]);
 
   const performOpenAnimation = useCallback(() => {
     setIsOpening(true);
@@ -123,6 +142,10 @@ export default function Home() {
     if (writeError && waitingForPayment) {
       setWaitingForPayment(false);
       setIsOpening(false);
+      const msg = writeError.message?.includes('2 mints')
+        ? 'You can only mint 2 crates per day. Try again tomorrow!'
+        : writeError.message?.slice(0, 120);
+      if (msg) alert(msg);
     }
   }, [writeError, waitingForPayment]);
 
@@ -132,9 +155,11 @@ export default function Home() {
       return;
     }
     if (!hasNftContract) {
-      alert(
-        'NFT contract is not deployed yet. Run: npm run deploy:base (see README) and set NEXT_PUBLIC_NFT_CONTRACT_ADDRESS on Vercel.',
-      );
+      alert('NFT contract is loading. Please try again in a moment.');
+      return;
+    }
+    if (mintsRemaining <= 0) {
+      alert(`Daily limit reached (${MAX_MINTS_PER_DAY} mints per day). Come back tomorrow!`);
       return;
     }
     if (isOpening || revealedNFT || waitingForPayment || isSending || isConfirming) return;
@@ -163,6 +188,7 @@ export default function Home() {
     setRevealedNFT(null);
     setRarity('');
     setTokenId(null);
+    setLastXpGain(null);
     setIsOpening(false);
   };
 
@@ -175,10 +201,12 @@ export default function Home() {
     <div className="phone-viewport">
       <div className="phone-scale">
         <div className="phone-frame relative bg-zinc-950 rounded-[60px] border-[18px] border-zinc-800 shadow-2xl overflow-hidden flex flex-col">
-        <div className="h-12 shrink-0 bg-zinc-900 flex items-center justify-between px-4 text-white text-sm border-b border-zinc-700">
+        <div className="h-12 shrink-0 bg-zinc-900 flex items-center justify-between px-3 text-white text-sm border-b border-zinc-700">
           <ConnectWallet />
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> LIVE
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-purple-400 font-bold">{totalXp} XP</span>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-zinc-400">LIVE</span>
           </div>
         </div>
 
@@ -186,10 +214,16 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white tracking-wider">MYSTIC CRATE</h1>
           <p className="text-sm text-purple-400 mt-1">
             {hasNftContract
-              ? `Mint real NFTs · ${OPEN_CRATE_PRICE} ETH on Base`
-              : 'Deploy contract to enable on-chain mints'}
+              ? `Mint NFTs · ${OPEN_CRATE_PRICE} ETH · ${mintsRemaining}/${MAX_MINTS_PER_DAY} left today`
+              : 'Connecting to Base...'}
           </p>
         </div>
+
+        {xpToast && (
+          <div className="text-center py-1.5 text-green-400 text-xs font-medium animate-pulse">
+            {xpToast}
+          </div>
+        )}
 
         {(waitingForPayment || isSending || isConfirming) && (
           <div className="text-center py-2 text-yellow-400 text-sm">
@@ -248,7 +282,10 @@ export default function Home() {
             >
               <div className="text-4xl font-bold text-purple-400 mb-1">{rarity}</div>
               {tokenId && (
-                <p className="text-xs text-zinc-400 mb-3">Token #{tokenId} · in your wallet</p>
+                <p className="text-xs text-zinc-400 mb-1">Token #{tokenId} · in your wallet</p>
+              )}
+              {lastXpGain != null && lastXpGain > 0 && (
+                <p className="text-sm text-green-400 font-semibold mb-2">+{lastXpGain} XP</p>
               )}
               <div className="relative w-64 h-64 mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 blur-3xl opacity-40 rounded-3xl" />
@@ -281,18 +318,52 @@ export default function Home() {
               </div>
             </motion.div>
           )}
+
+          <PhoneOverlay open={showDaily} title="Daily Rewards" onClose={() => setShowDaily(false)}>
+            <DailyPanel onXpToast={showXpToast} />
+          </PhoneOverlay>
+
+          <PhoneOverlay
+            open={showLeaderboard}
+            title="Leaderboard"
+            onClose={() => setShowLeaderboard(false)}
+          >
+            <LeaderboardPanel />
+          </PhoneOverlay>
         </div>
 
         <div className="h-20 shrink-0 bg-zinc-900 flex items-center justify-center gap-5 border-t border-zinc-700">
-          <div className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-2xl">◀</div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowLeaderboard(true);
+              setShowDaily(false);
+            }}
+            className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-2xl hover:bg-zinc-700 transition"
+            aria-label="Leaderboard"
+          >
+            ◀
+          </button>
           <div className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-2xl">S</div>
           <button
+            type="button"
             onClick={toggleMusic}
             className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold hover:bg-purple-700 transition"
+            aria-label="Toggle music"
           >
             {musicEnabled ? '🔊' : '🔇'}
           </button>
-          <div className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold">B</div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowDaily(true);
+              setShowLeaderboard(false);
+            }}
+            className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold hover:bg-purple-700 transition"
+            aria-label="Daily rewards"
+          >
+            B
+          </button>
         </div>
         </div>
       </div>
