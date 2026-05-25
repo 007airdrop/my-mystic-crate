@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   useAccount,
@@ -39,6 +40,7 @@ const hasNftContract =
   NFT_CONTRACT_ADDRESS.length > 0 && NFT_CONTRACT_ADDRESS.startsWith('0x');
 
 export default function Home() {
+  const queryClient = useQueryClient();
   const { isConnected } = useAccount();
   const { switchChain } = useSwitchChain();
   const { writeContract, data: hash, isPending: isSending, error: writeError } = useWriteContract();
@@ -115,6 +117,7 @@ export default function Home() {
         setLastXpGain(xpAwarded);
         setIsOpening(false);
         void refetchStats();
+        void queryClient.invalidateQueries({ queryKey: ['inventory'] });
         new Audio('/sounds/reveal.mp3').play().catch((err) => console.warn('Sound error:', err));
         return true;
       } catch {
