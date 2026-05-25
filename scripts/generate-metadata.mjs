@@ -56,7 +56,7 @@ const collection = {
   image: `${APP_URL}/opengraph-image`,
   external_link: APP_URL,
   seller_fee_basis_points: 500,
-  fee_recipient: '0x1630C69E6dDA942AAE2E9182A69eF4dEC6ce0A9D',
+  fee_recipient: '0xB2a3086539494F975C78D8D32c68a29e622eC6a5',
 };
 
 fs.mkdirSync(path.join(root, 'public', 'metadata'), { recursive: true });

@@ -1,5 +1,5 @@
 /** Treasury wallet — receives crate open fees on Base. */
-export const TREASURY_ADDRESS = '0x1630C69E6dDA942AAE2E9182A69eF4dEC6ce0A9D' as const;
+export const TREASURY_ADDRESS = '0xB2a3086539494F975C78D8D32c68a29e622eC6a5' as const;
 
 import { DEPLOYED_NFT_CONTRACT } from './deployed-address';
 

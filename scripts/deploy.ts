@@ -2,7 +2,7 @@ import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import hre from 'hardhat';
 
-const TREASURY_ADDRESS = '0x1630C69E6dDA942AAE2E9182A69eF4dEC6ce0A9D';
+const TREASURY_ADDRESS = '0xB2a3086539494F975C78D8D32c68a29e622eC6a5';
 const APP_URL = 'https://my-mystic-crate.vercel.app';
 
 function variantMetadataUri(id: number) {

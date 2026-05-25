@@ -2,7 +2,7 @@
 
 Farcaster mini app on [Base](https://base.org). Press **S** to pay **0.000001 ETH** and mint a **real ERC-721 NFT** (tradeable on [OpenSea](https://opensea.io) and other Base marketplaces).
 
-- **Treasury wallet:** `0x1630C69E6dDA942AAE2E9182A69eF4dEC6ce0A9D`
+- **Treasury wallet:** `0xB2a3086539494F975C78D8D32c68a29e622eC6a5`
 - **Live app:** [my-mystic-crate.vercel.app](https://my-mystic-crate.vercel.app)
 - **Repo:** [github.com/007airdrop/my-mystic-crate](https://github.com/007airdrop/my-mystic-crate)
 
