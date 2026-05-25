@@ -17,7 +17,8 @@
     "tags": ["nft", "base", "gaming", "crate", "crypto"],
     "ogTitle": "Mystic Crate",
     "ogDescription": "Open mystery crates on Base for 0.000001 ETH",
-    "ogImageUrl": "https://my-mystic-crate.vercel.app/opengraph-image",
+    "ogImageUrl": "https://my-mystic-crate.vercel.app/og-cover.png",
+    "heroImageUrl": "https://my-mystic-crate.vercel.app/og-cover.png",
     "tagline": "Check-in · Spin · Crate · Inventory · Ranks",
     "requiredChains": ["eip155:8453"]
   },
@@ -34,7 +35,8 @@
     "tags": ["nft", "base", "gaming", "crate", "crypto"],
     "ogTitle": "Mystic Crate",
     "ogDescription": "Open mystery crates on Base for 0.000001 ETH",
-    "ogImageUrl": "https://my-mystic-crate.vercel.app/opengraph-image",
+    "ogImageUrl": "https://my-mystic-crate.vercel.app/og-cover.png",
+    "heroImageUrl": "https://my-mystic-crate.vercel.app/og-cover.png",
     "tagline": "Check-in · Spin · Crate · Inventory · Ranks",
     "requiredChains": ["eip155:8453"]
   }

@@ -84,18 +84,41 @@ export function SpinWheelPanel({ onXpToast }: SpinWheelPanelProps) {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-3">
       <p className="text-purple-300 font-bold text-sm mb-2">🎡 Daily Spin Wheel</p>
-      <p className="text-zinc-400 text-[10px] mb-3 text-center">Free once per day · Win 15–30 XP</p>
+      <p className="text-zinc-400 text-[10px] mb-3 text-center">
+        Free once per day · Wheel shows 10–30 XP
+      </p>
 
       <div className="relative w-52 h-52 mb-4">
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 text-2xl">▼</div>
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-20 text-2xl drop-shadow-lg">
+          ▼
+        </div>
         <motion.div
-          className="w-full h-full rounded-full border-4 border-purple-500 shadow-lg shadow-purple-500/30"
+          className="w-full h-full rounded-full border-4 border-purple-500 shadow-lg shadow-purple-500/30 relative"
           style={{ background: wheelBg }}
           animate={{ rotate: rotation }}
           transition={{ duration: spinning ? 3 : 0, ease: 'easeOut' }}
         />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-14 h-14 rounded-full bg-zinc-900 border-2 border-purple-400 flex items-center justify-center text-2xl">
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {SPIN_WHEEL_SEGMENTS.map((seg, i) => {
+            const mid = (i + 0.5) * segmentAngle - 90;
+            return (
+              <div
+                key={seg.label}
+                className="absolute left-1/2 top-1/2 w-0 h-0"
+                style={{ transform: `rotate(${mid}deg)` }}
+              >
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 -top-[76px] text-[9px] font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap"
+                  style={{ transform: `rotate(${-mid}deg)` }}
+                >
+                  {seg.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[15]">
+          <div className="w-14 h-14 rounded-full bg-zinc-900 border-2 border-purple-400 flex items-center justify-center text-2xl shadow-inner">
             🎡
           </div>
         </div>

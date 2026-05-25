@@ -8,12 +8,12 @@ export function checkInXpForDay(day: number): number {
 
 /** Spin wheel segment labels (visual); on-chain awards 15–30 XP. */
 export const SPIN_WHEEL_SEGMENTS = [
-  { label: '15 XP', color: '#7c3aed' },
-  { label: '18 XP', color: '#db2777' },
-  { label: '20 XP', color: '#2563eb' },
-  { label: '22 XP', color: '#059669' },
-  { label: '25 XP', color: '#d97706' },
-  { label: '28 XP', color: '#dc2626' },
-  { label: '30 XP', color: '#9333ea' },
-  { label: 'Bonus', color: '#4f46e5' },
+  { label: '10', color: '#7c3aed' },
+  { label: '15', color: '#db2777' },
+  { label: '18', color: '#2563eb' },
+  { label: '20', color: '#059669' },
+  { label: '22', color: '#d97706' },
+  { label: '25', color: '#dc2626' },
+  { label: '28', color: '#9333ea' },
+  { label: '30', color: '#4f46e5' },
 ] as const;

@@ -1,11 +1,14 @@
-import { ImageResponse } from 'next/og'
-import { BrandImage } from '@/lib/brand-image'
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
-export const runtime = 'edge'
+export const runtime = 'nodejs';
 
 export async function GET() {
-  return new ImageResponse(<BrandImage label="S" />, {
-    width: 200,
-    height: 200,
-  })
+  const buf = await readFile(join(process.cwd(), 'public', 'app-icon.png'));
+  return new Response(buf, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
 }
