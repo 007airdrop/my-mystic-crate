@@ -1,0 +1,8 @@
+{
+  "name": "Mystic Crate",
+  "description": "Mystery crate NFTs on Base. Each open mints a real ERC-721 you can hold, trade on OpenSea, and list on any Base marketplace.",
+  "image": "https://my-mystic-crate.vercel.app/opengraph-image",
+  "external_link": "https://my-mystic-crate.vercel.app",
+  "seller_fee_basis_points": 500,
+  "fee_recipient": "0x1630C69E6dDA942AAE2E9182A69eF4dEC6ce0A9D"
+}
