@@ -4,7 +4,7 @@ export const APP_URL =
 
 /** Base.dev project app id (meta base:app_id) */
 export const BASE_APP_ID =
-  process.env.NEXT_PUBLIC_BASE_APP_ID ?? '6a11a15eeb640b005facbf51'
+  process.env.NEXT_PUBLIC_BASE_APP_ID ?? '6a167fb2f4a52373ee3e7723'
 
 export const ASSETS = {
   icon: `${APP_URL}/icon.png`,
