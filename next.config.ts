@@ -22,6 +22,13 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: '/screenshots/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
         source: '/metadata/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=3600' },
@@ -29,7 +36,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/:file(icon.png|og-cover.png|opengraph-image.png|app-icon.png)',
+        source: '/:file(icon.png|og-cover.png|opengraph-image.png|app-icon.png|miniapp-card.png)',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=86400' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
@@ -42,6 +49,10 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value:
               "frame-ancestors 'self' https://warpcast.com https://*.warpcast.com https://farcaster.xyz https://*.farcaster.xyz https://base.org https://*.base.org https://base.app https://*.base.app https://vercel.app https://*.vercel.app",
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
           },
         ],
       },

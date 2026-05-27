@@ -1,14 +1,18 @@
 import { http, createConfig, createStorage, cookieStorage } from 'wagmi'
 import { base } from 'wagmi/chains'
-import { injected } from 'wagmi/connectors'
-import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
+import { baseAccount, injected } from 'wagmi/connectors'
+import { ASSETS } from '@/lib/constants'
 
-export const farcasterConnector = farcasterMiniApp()
+export const baseAccountConnector = baseAccount({
+  appName: 'Mystic Crate',
+  appLogoUrl: ASSETS.icon,
+})
+
 export const injectedConnector = injected()
 
 export const config = createConfig({
   chains: [base],
-  connectors: [farcasterConnector, injectedConnector],
+  connectors: [baseAccountConnector, injectedConnector],
   storage: createStorage({ storage: cookieStorage }),
   ssr: true,
   transports: {

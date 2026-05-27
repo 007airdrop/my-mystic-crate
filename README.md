@@ -1,10 +1,10 @@
 # Mystic Crate
 
-Farcaster mini app on [Base](https://base.org). Press **S** to pay **0.000001 ETH** and mint a **real ERC-721 NFT** (tradeable on [OpenSea](https://opensea.io) and other Base marketplaces).
+Base App on [Base](https://base.org). Press **S** to pay **0.000001 ETH** and mint a **real ERC-721 NFT** (tradeable on [OpenSea](https://opensea.io) and other Base marketplaces).
 
 - **Treasury wallet:** `0xB2a3086539494F975C78D8D32c68a29e622eC6a5`
-- **Live app:** [my-mystic-crate.vercel.app](https://my-mystic-crate.vercel.app)
-- **Repo:** [github.com/007airdrop/my-mystic-crate](https://github.com/007airdrop/my-mystic-crate)
+- **Live app:** [mystic-crate1.vercel.app](https://mystic-crate1.vercel.app)
+- **Repo:** [github.com/007airdrop/mystic-crate1](https://github.com/007airdrop/mystic-crate1)
 
 ## Quick start
 
@@ -31,9 +31,11 @@ npm run deploy:base
 
 After deploy, each crate open calls `openCrate()` on the contract: the user receives an NFT in their wallet and the fee is sent to the treasury.
 
-## Farcaster sync
+## Base App
 
-If Vercel is connected to this GitHub repo, pushing to `main` triggers a new deployment. The Farcaster mini app loads `https://my-mystic-crate.vercel.app` from `public/.well-known/farcaster.json` — no separate Farcaster publish step; users get the new build after Vercel finishes.
+1. Register the app at [base.dev](https://base.dev) with primary URL `https://mystic-crate1.vercel.app` (name, icon, tagline, screenshots, category, description, builder code). Asset URLs are listed in `public/base-app-metadata.json`.
+2. Wallet connection uses the wagmi `baseAccount` connector inside the Base App; no Farcaster mini-app SDK is required.
+3. If Vercel is connected to this repo, pushing to `main` redeploys — users get the new build after Vercel finishes.
 
 ## NFT metadata
 

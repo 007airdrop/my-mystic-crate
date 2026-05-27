@@ -1,0 +1,16 @@
+{
+  "appId": "6a11a15eeb640b005facbf51",
+  "name": "Mystic Crate",
+  "primaryUrl": "https://mystic-crate1.vercel.app",
+  "tagline": "Mint spin crate on Base",
+  "subtitle": "Crates spin check-in XP",
+  "description": "Mint NFTs on Base with daily check-in streaks spin wheel XP inventory and leaderboard. Press S to open crates.",
+  "category": "games",
+  "iconUrl": "https://mystic-crate1.vercel.app/icon.png",
+  "heroImageUrl": "https://mystic-crate1.vercel.app/og-cover.png",
+  "ogImageUrl": "https://mystic-crate1.vercel.app/og-cover.png",
+  "screenshotUrls": [
+    "https://mystic-crate1.vercel.app/screenshots/app-screenshot.png"
+  ],
+  "tags": ["nft", "base", "gaming", "crate", "crypto"]
+}

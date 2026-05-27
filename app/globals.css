@@ -1,10 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --phone-width: 420;
-  --phone-height: 760;
+  --phone-width: 360;
+  --phone-height: 680;
+  /* Space reserved for mobile browser chrome (URL bar + bottom nav) */
+  --host-chrome: 100px;
+  --phone-max-scale: 1;
   --background: #000000;
   --foreground: #ededed;
+}
+
+/* Base App / in-app browser: smaller phone + extra chrome inset */
+html[data-embedded-app='true'] {
+  --phone-width: 340;
+  --phone-height: 640;
+  --host-chrome: 168px;
+  --phone-max-scale: 0.88;
 }
 
 @theme inline {
@@ -39,7 +50,12 @@ body {
 
 .phone-scale {
   transform: scale(
-    min(1, 100vw / var(--phone-width), 100dvh / var(--phone-height), 100svh / var(--phone-height))
+    min(
+      var(--phone-max-scale),
+      (100vw - 16px) / var(--phone-width),
+      (100dvh - var(--host-chrome)) / var(--phone-height),
+      (100svh - var(--host-chrome)) / var(--phone-height)
+    )
   );
   transform-origin: center center;
 }
