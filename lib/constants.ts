@@ -1,6 +1,6 @@
 /** Canonical production URL — must match Base.dev primary URL */
 export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? 'https://mystic-crate1.vercel.app'
+  process.env.NEXT_PUBLIC_APP_URL ?? 'https://my-mystic-crate.vercel.app'
 
 /** Base.dev project app id (meta base:app_id) */
 export const BASE_APP_ID =
